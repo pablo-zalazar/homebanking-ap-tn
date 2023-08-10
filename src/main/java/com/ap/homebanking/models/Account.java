@@ -1,10 +1,11 @@
 package com.ap.homebanking.models;
 
-import com.ap.homebanking.dtos.ClientDTO;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Account {
@@ -24,6 +25,9 @@ public class Account {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="owner_id")
     private Client owner;
+
+    @OneToMany(mappedBy = "account", fetch = FetchType.EAGER)
+    Set<Transaction> transactions = new HashSet<>();
 
     public Account(String number, LocalDate date, double balance) {
         this.number = number;
@@ -48,4 +52,11 @@ public class Account {
     public Client getOwner() {return owner;}
 
     public void setOwner(Client owner) {this.owner = owner;}
+
+    public Set<Transaction> getTransactions() {return transactions;}
+
+    public void addTransaction(Transaction transaction){
+        transaction.setAccount(this);
+        transactions.add(transaction);
+    }
 }

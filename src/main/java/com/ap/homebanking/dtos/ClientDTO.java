@@ -16,7 +16,7 @@ public class ClientDTO {
 
     private String email;
 
-    Set<AccountDTO> accounts = new HashSet<>();
+    private Set<AccountDTO> accounts = new HashSet<>();
 
     public ClientDTO(Client client) {
         this.id = client.getId();
