@@ -27,7 +27,7 @@ public class Account {
     private Client owner;
 
     @OneToMany(mappedBy = "account", fetch = FetchType.EAGER)
-    Set<Transaction> transactions = new HashSet<>();
+    private Set<Transaction> transactions = new HashSet<>();
 
     public Account(String number, LocalDate date, double balance) {
         this.number = number;
