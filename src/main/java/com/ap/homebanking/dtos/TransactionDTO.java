@@ -17,6 +17,7 @@ public class TransactionDTO {
     private LocalDateTime date;
 
     public TransactionDTO(Transaction transaction) {
+        this.id = transaction.getId();
         this.type = transaction.getType();
         this.amount = transaction.getAmount();
         this.description = transaction.getDescription();

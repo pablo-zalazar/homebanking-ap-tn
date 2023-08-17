@@ -1,5 +1,6 @@
 package com.ap.homebanking.dtos;
 
+import com.ap.homebanking.models.Card;
 import com.ap.homebanking.models.Client;
 
 import java.util.HashSet;
@@ -20,6 +21,8 @@ public class ClientDTO {
 
     private Set<ClientLoanDTO> clientLoans = new HashSet<>();
 
+   private Set<CardDTO> cards = new HashSet<>();
+
     public ClientDTO(Client client) {
         this.id = client.getId();
         this.firstName = client.getFirstName();
@@ -27,6 +30,7 @@ public class ClientDTO {
         this.email = client.getEmail();
         this.accounts = client.getAccounts().stream().map(account -> new AccountDTO(account)).collect(toSet());
         this.clientLoans = client.getClientLoans().stream().map(clientLoan -> new ClientLoanDTO(clientLoan)).collect(toSet());
+        this.cards = client.getCards().stream().map(card -> new CardDTO(card)).collect(toSet());
     }
 
     public long getId() {return id;}
@@ -40,5 +44,7 @@ public class ClientDTO {
     public Set<AccountDTO> getAccounts() {return accounts;}
 
     public Set<ClientLoanDTO> getLoans() {return clientLoans;}
+
+    public Set<CardDTO> getCards() {return cards;}
 }
 

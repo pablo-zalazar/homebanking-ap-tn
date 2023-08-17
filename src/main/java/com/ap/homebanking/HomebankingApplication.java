@@ -17,7 +17,7 @@ public class HomebankingApplication {
 	public static void main(String[] args) {SpringApplication.run(HomebankingApplication.class, args);}
 
 	@Bean
-	public CommandLineRunner initData(ClientRepository clientRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, LoanRepository loanRepository, ClientLoanRepository clientLoan){
+	public CommandLineRunner initData(ClientRepository clientRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, LoanRepository loanRepository, ClientLoanRepository clientLoan, CardRepository cardRepository){
 		return (args -> {
 			Client client1 = new Client("Melba", "Morel", "melba_morel@gmail.com");
 			Client client2 = new Client("Pablo", "Zalazar", "pablo_zalazar@gmail.com");
@@ -83,6 +83,22 @@ public class HomebankingApplication {
 			clientLoan.save(clientLoan2);
 			clientLoan.save(clientLoan3);
 			clientLoan.save(clientLoan4);
+
+			LocalDate thruDate = today.plusYears(5);
+			String cardHolder1 = client1.getFirstName() + " " + client1.getLastName();
+			String cardHolder2 = client2.getFirstName() + " " + client2.getLastName();
+			Card card1 = new Card("111111", 111, today, thruDate, cardHolder1, CardType.CREDIT, CardColor.GOLD);
+			Card card2 = new Card("222222", 222, today, thruDate, cardHolder1, CardType.DEBIT, CardColor.TITANIUM);
+			Card card3 = new Card("333333", 333, today, thruDate, cardHolder2, CardType.CREDIT, CardColor.SILVER);
+
+			card1.setOwner(client1);
+			card2.setOwner(client1);
+			card3.setOwner(client2);
+
+			cardRepository.save(card1);
+			cardRepository.save(card2);
+			cardRepository.save(card3);
+
 
 
 		});
