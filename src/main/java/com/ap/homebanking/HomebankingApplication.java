@@ -2,10 +2,12 @@ package com.ap.homebanking;
 
 import com.ap.homebanking.models.*;
 import com.ap.homebanking.repositories.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,14 +15,17 @@ import java.util.List;
 
 @SpringBootApplication
 public class HomebankingApplication {
-
 	public static void main(String[] args) {SpringApplication.run(HomebankingApplication.class, args);}
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	@Bean
 	public CommandLineRunner initData(ClientRepository clientRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, LoanRepository loanRepository, ClientLoanRepository clientLoan, CardRepository cardRepository){
 		return (args -> {
-			Client client1 = new Client("Melba", "Morel", "melba_morel@gmail.com");
-			Client client2 = new Client("Pablo", "Zalazar", "pablo_zalazar@gmail.com");
+			Client client1 = new Client("Melba", "Morel", "melba_morel@gmail.com", passwordEncoder.encode("password1"));
+			Client client2 = new Client("Pablo", "Zalazar", "pablo_zalazar@gmail.com", passwordEncoder.encode("password2"));
+			Client admin = new Client("Admin", "Admin", "admin@gmail.com", passwordEncoder.encode("adminpassword"));
 
 			LocalDate today = LocalDate.now();
 			LocalDate tomorrow = today.plusDays(1);
@@ -31,6 +36,7 @@ public class HomebankingApplication {
 
 			clientRepository.save(client1);
 			clientRepository.save(client2);
+			clientRepository.save(admin);
 
 			account1.setOwner(client1);
 			account2.setOwner(client1);
