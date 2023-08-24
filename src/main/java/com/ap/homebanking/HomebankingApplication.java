@@ -29,10 +29,10 @@ public class HomebankingApplication {
 
 			LocalDate today = LocalDate.now();
 			LocalDate tomorrow = today.plusDays(1);
-			Account account1 = new Account("VIN001", today, 5000);
-			Account account2 = new Account("VIN002", tomorrow, 7500);
-			Account account3 = new Account("VIN003", today, 2500);
-			Account account4 = new Account("VIN004", tomorrow, 10000);
+			Account account1 = new Account("VIN-001", today, 5000);
+			Account account2 = new Account("VIN-002", tomorrow, 7500);
+			Account account3 = new Account("VIN-003", today, 2500);
+			Account account4 = new Account("VIN-004", tomorrow, 10000);
 
 			clientRepository.save(client1);
 			clientRepository.save(client2);
@@ -93,9 +93,9 @@ public class HomebankingApplication {
 			LocalDate thruDate = today.plusYears(5);
 			String cardHolder1 = client1.getFirstName() + " " + client1.getLastName();
 			String cardHolder2 = client2.getFirstName() + " " + client2.getLastName();
-			Card card1 = new Card("111111", 111, today, thruDate, cardHolder1, CardType.CREDIT, CardColor.GOLD);
-			Card card2 = new Card("222222", 222, today, thruDate, cardHolder1, CardType.DEBIT, CardColor.TITANIUM);
-			Card card3 = new Card("333333", 333, today, thruDate, cardHolder2, CardType.CREDIT, CardColor.SILVER);
+			Card card1 = new Card("111-111-111-111", 111, today, thruDate, cardHolder1, CardType.CREDIT, CardColor.GOLD);
+			Card card2 = new Card("222-222-222-222", 222, today, thruDate, cardHolder1, CardType.DEBIT, CardColor.TITANIUM);
+			Card card3 = new Card("333-333-333-333", 333, today, thruDate, cardHolder2, CardType.CREDIT, CardColor.SILVER);
 
 			card1.setOwner(client1);
 			card2.setOwner(client1);
@@ -104,9 +104,6 @@ public class HomebankingApplication {
 			cardRepository.save(card1);
 			cardRepository.save(card2);
 			cardRepository.save(card3);
-
-
-
 		});
 	}
 }
