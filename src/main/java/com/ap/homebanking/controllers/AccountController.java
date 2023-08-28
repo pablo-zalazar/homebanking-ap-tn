@@ -67,7 +67,7 @@ public class AccountController {
                 clientRepository.save(client);
                 acc.setOwner(client);
                 accountRepository.save(acc);
-                return new ResponseEntity<>(HttpStatus.CREATED);
+                return new ResponseEntity<>("Account created", HttpStatus.CREATED);
             }
         }else{
             throw new UsernameNotFoundException("Unknown user: " + userEmail);

@@ -94,6 +94,6 @@ public class ClientController {
         clientRepository.save(client);
         acc.setOwner(client);
         accountRepository.save(acc);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>("Client created",HttpStatus.CREATED);
     }
 }

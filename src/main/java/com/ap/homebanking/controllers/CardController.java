@@ -42,6 +42,11 @@ public class CardController {
     public ResponseEntity<Object> createAccount(@RequestParam CardColor cardColor, @RequestParam CardType cardType, Authentication authentication){
         Client client = clientRepository.findByEmail(authentication.getName());
         Set<Card> cards = client.getCards();
+
+        if(cards.size() > 5){
+            return new ResponseEntity<>("You can't create more cards", HttpStatus.FORBIDDEN);
+        }
+
         byte typeCardsAmount = 0;
         HashSet<CardColor> colorsCards = new HashSet<CardColor>();
         for(Card card:cards){
@@ -52,7 +57,7 @@ public class CardController {
             }
         }
         if(typeCardsAmount > 2) {
-            return new ResponseEntity<>("Already have 3" + cardType + " cards", HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>("Already have 3 " + cardType + " cards", HttpStatus.FORBIDDEN);
         }
         if(colorsCards.contains(cardColor)) {
             return new ResponseEntity<>("Already have a " + cardType.toString().toLowerCase() + " " + cardColor.toString().toLowerCase() + " card", HttpStatus.FORBIDDEN);
@@ -74,6 +79,6 @@ public class CardController {
         Card card = new Card(number,cvv,fromDate,thruDate,cardHolder,cardType,cardColor);
         card.setOwner(client);
         cardRepository.save(card);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>("Card created",HttpStatus.CREATED);
     }
 }
