@@ -48,6 +48,7 @@ public class AccountController {
         return clientRepository.findByEmail(authentication.getName()).getAccounts().stream().map(AccountDTO::new).collect(toList());
     }
 
+    // validar numero de tarjeta que no exista
     @RequestMapping(path= "/clients/current/accounts", method = RequestMethod.POST)
     public ResponseEntity<Object> createAccount(Authentication authentication){
         String userEmail = authentication.getName();
@@ -58,9 +59,14 @@ public class AccountController {
                 return new ResponseEntity<>("\n" +
                         "already have 3 accounts", HttpStatus.FORBIDDEN);
             }else{
-                Random random = new Random(); // Crear una instancia de la clase Random
-                int n = random.nextInt(90000000) + 10000000; // Generar un número aleatorio de 8 dígitos
-                String number = "VIN-" + n;
+                String number = "";
+                while(true){
+                    Random random = new Random(); // Crear una instancia de la clase Random
+                    int n = random.nextInt(90000000) + 10000000; // Generar un número aleatorio de 8 dígitos
+                    number = "VIN-" + n;
+                    Account existsAccount = accountRepository.findByNumber(number);
+                    if(existsAccount == null) break;
+                }
                 LocalDate today = LocalDate.now();
                 Account acc = new Account(number, today, 0);
                 client.addAccount(acc);

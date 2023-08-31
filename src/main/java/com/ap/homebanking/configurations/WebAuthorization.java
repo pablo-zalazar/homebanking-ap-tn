@@ -23,8 +23,11 @@ public class WebAuthorization  {
         http.authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/api/login", "/api/logout", "/api/clients").permitAll()
                 .antMatchers("/rest/**").hasAuthority("ADMIN")
+                .antMatchers(HttpMethod.POST,"/api/clients/**").hasAnyAuthority("CLIENT", "ADMIN")
                 .antMatchers("/api/clients/**").hasAnyAuthority("CLIENT", "ADMIN")
+                .antMatchers(HttpMethod.POST,"/api/transactions/**").hasAnyAuthority("CLIENT", "ADMIN")
                 .antMatchers("/api/transactions/**").hasAnyAuthority("CLIENT", "ADMIN");
+
 
         http.formLogin()
                 .usernameParameter("email")

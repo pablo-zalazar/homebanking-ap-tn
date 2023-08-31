@@ -100,7 +100,7 @@ public class TransactionController {
         toAccount.setBalance(toAccount.getBalance() + amount);
 
         accountRepository.save(fromAccount);
-        accountRepository.save(null);
+        accountRepository.save(toAccount);
 
         return new ResponseEntity<>("Transaction created", HttpStatus.CREATED);
     }

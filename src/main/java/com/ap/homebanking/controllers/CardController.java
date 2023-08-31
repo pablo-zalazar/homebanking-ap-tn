@@ -38,8 +38,26 @@ public class CardController {
         return clientRepository.findByEmail(authentication.getName()).getCards().stream().map(CardDTO::new).collect(toList());
     }
 
+    // Validar numero y cvv de la tarjeta que no existan
     @RequestMapping(path="/clients/current/cards", method = RequestMethod.POST)
-    public ResponseEntity<Object> createAccount(@RequestParam CardColor cardColor, @RequestParam CardType cardType, Authentication authentication){
+    public ResponseEntity<Object> createAccount(@RequestParam String cardColor, @RequestParam String cardType, Authentication authentication){
+
+        if (cardColor.isEmpty()) {
+            return new ResponseEntity<>("Missing cardColor", HttpStatus.FORBIDDEN);
+        }
+
+        if (cardType.isEmpty()) {
+            return new ResponseEntity<>("Missing cardType", HttpStatus.FORBIDDEN);
+        }
+
+        if (!cardColor.equals("GOLD") && !cardColor.equals("SILVER") && !cardColor.equals("TITANIUM")) {
+            return new ResponseEntity<>("Invalid cardColor option", HttpStatus.FORBIDDEN);
+        }
+
+        if (!cardType.equals("CREDIT") && !cardType.equals("DEBIT")) {
+            return new ResponseEntity<>("Invalid cardType option", HttpStatus.FORBIDDEN);
+        }
+
         Client client = clientRepository.findByEmail(authentication.getName());
         Set<Card> cards = client.getCards();
 
@@ -48,35 +66,38 @@ public class CardController {
         }
 
         byte typeCardsAmount = 0;
-        HashSet<CardColor> colorsCards = new HashSet<CardColor>();
+        HashSet<String> colorsCards = new HashSet<String>();
         for(Card card:cards){
-            if(card.getType() == cardType)
+            if(card.getType().name().equals(cardType))
             {
                 typeCardsAmount++;
-                colorsCards.add(card.getColor());
+                colorsCards.add(card.getColor().name());
             }
         }
         if(typeCardsAmount > 2) {
             return new ResponseEntity<>("Already have 3 " + cardType + " cards", HttpStatus.FORBIDDEN);
         }
         if(colorsCards.contains(cardColor)) {
-            return new ResponseEntity<>("Already have a " + cardType.toString().toLowerCase() + " " + cardColor.toString().toLowerCase() + " card", HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>("Already have a " + cardType.toLowerCase() + " " + cardColor.toLowerCase() + " card", HttpStatus.FORBIDDEN);
         }
 
         Random random = new Random();
-        int cvv = random.nextInt(900) + 100;
         String n = "";
         String number = "";
-        for(int i = 0; i<4; i++){
-            n = Integer.toString(random.nextInt(900) + 100);
-            if(i!=3) number = number + n + "-";
-            else number = number + n;
+        int cvv = random.nextInt(900) + 100;
+        while(true){
+            for(int i = 0; i<4; i++){
+                n = Integer.toString(random.nextInt(900) + 100);
+                if(i!=3) number = number + n + "-";
+                else number = number + n;
+            }
+            if(cardRepository.findByNumber(number) == null ) break;
         }
 
         String cardHolder = client.getFirstName() + " " + client.getLastName();
         LocalDate fromDate = LocalDate.now();
         LocalDate thruDate = fromDate.plusYears(5);
-        Card card = new Card(number,cvv,fromDate,thruDate,cardHolder,cardType,cardColor);
+        Card card = new Card(number,cvv,fromDate,thruDate,cardHolder,CardType.valueOf(cardType),CardColor.valueOf(cardColor));
         card.setOwner(client);
         cardRepository.save(card);
         return new ResponseEntity<>("Card created",HttpStatus.CREATED);

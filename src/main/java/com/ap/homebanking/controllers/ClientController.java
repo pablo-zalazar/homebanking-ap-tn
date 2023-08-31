@@ -85,10 +85,16 @@ public class ClientController {
         }
 
         Client client = new Client(firstName, lastName, email, passwordEncoder.encode(password));
-        Random random = new Random();
-        int n = random.nextInt(90000000) + 10000000;
-        String number = "VIN-" + n;
-        LocalDate today = LocalDate.now();
+
+        String number = "";
+        while(true){
+            Random random = new Random(); // Crear una instancia de la clase Random
+            int n = random.nextInt(90000000) + 10000000; // Generar un número aleatorio de 8 dígitos
+            number = "VIN-" + n;
+            Account existsAccount = accountRepository.findByNumber(number);
+            if(existsAccount == null) break;
+        }
+                LocalDate today = LocalDate.now();
         Account acc = new Account(number, today, 0);
         client.addAccount(acc);
         clientRepository.save(client);
