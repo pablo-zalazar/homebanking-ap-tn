@@ -4,9 +4,9 @@ import com.ap.homebanking.models.Account;
 import com.ap.homebanking.models.Client;
 import com.ap.homebanking.models.Transaction;
 import com.ap.homebanking.models.TransactionType;
-import com.ap.homebanking.repositories.AccountRepository;
-import com.ap.homebanking.repositories.ClientRepository;
-import com.ap.homebanking.repositories.TransactionRepository;
+import com.ap.homebanking.services.AccountService;
+import com.ap.homebanking.services.ClientService;
+import com.ap.homebanking.services.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.transaction.Transactional;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -27,13 +26,13 @@ import java.util.Set;
 public class TransactionController {
 
     @Autowired
-    private ClientRepository clientRepository;
+    private AccountService accountService;
 
     @Autowired
-    private AccountRepository accountRepository;
+    private ClientService clientService;
 
     @Autowired
-    private TransactionRepository transactionRepository;
+    private TransactionService transactionService;
 
     @Transactional
     @RequestMapping(path="/transactions", method = RequestMethod.POST)
@@ -61,12 +60,12 @@ public class TransactionController {
             return new ResponseEntity<>("The account numbers are the same", HttpStatus.FORBIDDEN);
         }
 
-        Account fromAccount = accountRepository.findByNumber(fromAccountNumber);
+        Account fromAccount = accountService.getAccountByNumber(fromAccountNumber);
         if(fromAccount == null){
             return new ResponseEntity<>("Account from number " + fromAccountNumber + " don't exists", HttpStatus.FORBIDDEN);
         }
 
-        Client client = clientRepository.findByEmail(authentication.getName());
+        Client client = clientService.getClientByEmail(authentication.getName());
         Set<Account> accounts = client.getAccounts();
         HashSet<String> accountsNumber = new HashSet<String>();
         for(Account acc:accounts){
@@ -77,7 +76,7 @@ public class TransactionController {
             return new ResponseEntity<>("The user is not the owner of the account" + fromAccountNumber, HttpStatus.FORBIDDEN);
         }
 
-        Account toAccount = accountRepository.findByNumber(toAccountNumber);
+        Account toAccount = accountService.getAccountByNumber(toAccountNumber);
         if(toAccount == null){
             return new ResponseEntity<>("Account to number " + toAccountNumber + " don't exists", HttpStatus.FORBIDDEN);
         }
@@ -93,17 +92,15 @@ public class TransactionController {
         debitTransaction.setAccount(fromAccount);
         creditTransaction.setAccount(toAccount);
 
-        transactionRepository.save(debitTransaction);
-        transactionRepository.save(creditTransaction);
+        transactionService.saveTransaction(debitTransaction);
+        transactionService.saveTransaction(creditTransaction);
 
         fromAccount.setBalance(fromAccount.getBalance() - amount);
         toAccount.setBalance(toAccount.getBalance() + amount);
 
-        accountRepository.save(fromAccount);
-        accountRepository.save(toAccount);
+        accountService.saveAccount(fromAccount);
+        accountService.saveAccount(toAccount);
 
         return new ResponseEntity<>("Transaction created", HttpStatus.CREATED);
     }
-
-
 }

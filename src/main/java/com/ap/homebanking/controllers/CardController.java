@@ -5,8 +5,8 @@ import com.ap.homebanking.models.Card;
 import com.ap.homebanking.models.CardColor;
 import com.ap.homebanking.models.CardType;
 import com.ap.homebanking.models.Client;
-import com.ap.homebanking.repositories.CardRepository;
-import com.ap.homebanking.repositories.ClientRepository;
+import com.ap.homebanking.services.CardService;
+import com.ap.homebanking.services.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,23 +22,21 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import static java.util.stream.Collectors.toList;
-
 @RestController
 @RequestMapping("/api")
 public class CardController {
 
     @Autowired
-    private CardRepository cardRepository;
+    private ClientService clientService;
+
     @Autowired
-    private ClientRepository clientRepository;
+    private CardService cardService;
 
     @RequestMapping("/clients/current/cards")
     public List<CardDTO> getCurrentCards(Authentication authentication){
-        return clientRepository.findByEmail(authentication.getName()).getCards().stream().map(CardDTO::new).collect(toList());
+        return clientService.getClientCards(authentication.getName());
     }
 
-    // Validar numero y cvv de la tarjeta que no existan
     @RequestMapping(path="/clients/current/cards", method = RequestMethod.POST)
     public ResponseEntity<Object> createAccount(@RequestParam String cardColor, @RequestParam String cardType, Authentication authentication){
 
@@ -58,7 +56,7 @@ public class CardController {
             return new ResponseEntity<>("Invalid cardType option", HttpStatus.FORBIDDEN);
         }
 
-        Client client = clientRepository.findByEmail(authentication.getName());
+        Client client = clientService.getClientByEmail(authentication.getName());
         Set<Card> cards = client.getCards();
 
         if(cards.size() > 5){
@@ -91,7 +89,7 @@ public class CardController {
                 if(i!=3) number = number + n + "-";
                 else number = number + n;
             }
-            if(cardRepository.findByNumber(number) == null ) break;
+            if(cardService.getCardByNumber(number) == null ) break;
         }
 
         String cardHolder = client.getFirstName() + " " + client.getLastName();
@@ -99,7 +97,7 @@ public class CardController {
         LocalDate thruDate = fromDate.plusYears(5);
         Card card = new Card(number,cvv,fromDate,thruDate,cardHolder,CardType.valueOf(cardType),CardColor.valueOf(cardColor));
         card.setOwner(client);
-        cardRepository.save(card);
+        cardService.saveCard(card);
         return new ResponseEntity<>("Card created",HttpStatus.CREATED);
     }
 }

@@ -1,11 +1,10 @@
 package com.ap.homebanking.controllers;
 
 import com.ap.homebanking.dtos.AccountDTO;
-import com.ap.homebanking.dtos.ClientDTO;
 import com.ap.homebanking.models.Account;
 import com.ap.homebanking.models.Client;
-import com.ap.homebanking.repositories.AccountRepository;
-import com.ap.homebanking.repositories.ClientRepository;
+import com.ap.homebanking.services.AccountService;
+import com.ap.homebanking.services.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,39 +19,35 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Random;
 
-import static java.util.stream.Collectors.toList;
-
 @RestController
 @RequestMapping("/api")
 public class AccountController {
 
     @Autowired
-    private AccountRepository accountRepository;
+    private AccountService accountService;
+
     @Autowired
-    private ClientRepository clientRepository;
+    private ClientService clientService;
 
     @RequestMapping("/accounts")
     public List<AccountDTO> getAccounts(){
-//        return clientRepository.findAll().stream().map(client -> new ClientDTO(client)).collect(toList());
-        return accountRepository.findAll().stream().map(AccountDTO::new).collect(toList());
+        return accountService.getAllAccount();
     }
 
     @RequestMapping("/accounts/{id}")
     public AccountDTO getClient(@PathVariable Long id){
-        AccountDTO account = new AccountDTO(accountRepository.findById(id).orElse(null));
-        return account;
+        return new AccountDTO(accountService.getAccountById(id));
     }
 
     @RequestMapping("/clients/current/accounts")
     public List<AccountDTO> getCurrentAccounts(Authentication authentication){
-        return clientRepository.findByEmail(authentication.getName()).getAccounts().stream().map(AccountDTO::new).collect(toList());
+        return clientService.getClientAccounts(authentication.getName());
     }
 
-    // validar numero de tarjeta que no exista
     @RequestMapping(path= "/clients/current/accounts", method = RequestMethod.POST)
     public ResponseEntity<Object> createAccount(Authentication authentication){
         String userEmail = authentication.getName();
-        Client client = clientRepository.findByEmail(userEmail);
+        Client client = clientService.getClientByEmail(authentication.getName());
         if(client != null){
             System.out.println(client.getAccounts().size());
             if(client.getAccounts().size() > 2){
@@ -64,15 +59,15 @@ public class AccountController {
                     Random random = new Random(); // Crear una instancia de la clase Random
                     int n = random.nextInt(90000000) + 10000000; // Generar un número aleatorio de 8 dígitos
                     number = "VIN-" + n;
-                    Account existsAccount = accountRepository.findByNumber(number);
+                    Account existsAccount = accountService.getAccountByNumber(number);
                     if(existsAccount == null) break;
                 }
                 LocalDate today = LocalDate.now();
                 Account acc = new Account(number, today, 0);
                 client.addAccount(acc);
-                clientRepository.save(client);
+                clientService.saveClient(client);
                 acc.setOwner(client);
-                accountRepository.save(acc);
+                accountService.saveAccount(acc);
                 return new ResponseEntity<>("Account created", HttpStatus.CREATED);
             }
         }else{
